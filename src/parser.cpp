@@ -46,7 +46,48 @@ void parse_graph(Graph::Graph& graph, const onnx::GraphProto& onnx_graph) {
             Graph::Tensor* t = map_tensor[output_name];
             node->add_output(t);
         }
+        process_attributes(proto_node, node.get());
         graph.add_node(std::move(node));
+    }
+}
+
+void process_attributes(const ::onnx::NodeProto& proto_node, Graph::Node* node) {
+    for(auto& proto_atr: proto_node.attribute()) {
+    //TODO: create atr after processing< сначала получит value
+        Graph::Attribute atr(proto_atr.name(), static_cast<Graph::Attribute::AttributeType>(proto_atr.type()));
+        switch(atr.get_type()) {
+        case Graph::Attribute::AttributeType::INT: {
+            atr.value_ = proto_atr.i();
+            break;
+        }
+        case Graph::Attribute::AttributeType::INTS: {
+            std::vector<int> value(proto_atr.ints().begin(), proto_atr.ints().end());
+            atr.value_ = std::move(value);
+            break;
+        }
+        case Graph::Attribute::AttributeType::FLOAT: {
+            atr.value_ = proto_atr.f();
+            break;
+        }
+        case Graph::Attribute::AttributeType::FLOATS: {
+            std::vector<float> value(proto_atr.floats().begin(), proto_atr.floats().end());
+            atr.value_ = std::move(value);
+            break;
+        }
+        case Graph::Attribute::AttributeType::STRING: {
+            atr.value_ = proto_atr.s();
+            break;
+        }
+        case Graph::Attribute::AttributeType::STRINGS: {
+            std::vector<std::string> value(proto_atr.strings().begin(), proto_atr.strings().end());
+            atr.value_ = std::move(value);
+            break;
+        }
+        default: {
+            break;
+        }
+        }
+        node->add_attribute(std::move(atr));
     }
 }
 

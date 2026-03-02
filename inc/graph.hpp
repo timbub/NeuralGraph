@@ -2,10 +2,13 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_map>
+#include <variant>
 
 namespace Graph {
 
     class Node;
+    class Attribute;
 
     class Tensor {
     public:
@@ -60,7 +63,33 @@ namespace Graph {
         void set_producer(Node* node) { producer_ = node; }
         void add_consumer(Node* node) { consumers_.push_back(node); }
     };
-
+    class Attribute {
+    public:
+        using Value = std::variant<int64_t,
+            std::vector<int64_t>,
+            float, std::vector<float>,
+            std::string,
+            std::vector<std::string>
+            >;
+        enum AttributeType {
+          UNDEFINED = 0,
+          FLOAT = 1,
+          INT = 2,
+          STRING = 3,
+          FLOATS = 4,
+          INTS = 5,
+          STRINGS = 6
+        };
+    private:
+        std::string   name_;
+        AttributeType type_;
+        Value value_;
+    public:
+        Attribute(std::string name, AttributeType type) : name_(name), type_(type) {}
+        std::string   get_name() { return name_; }
+        AttributeType get_type() { return type_; }
+        //TODO: getter for value_
+    };
 
     class Node {
     private:
@@ -68,7 +97,7 @@ namespace Graph {
         std::string name_;
         std::vector<Tensor*> input_;
         std::vector<Tensor*> output_;
-        //attributes
+        std::unordered_map<std::string, Attribute> attributes_;
     public:
         Node(std::string op_type, std::string name)
             : op_type_(std::move(op_type)), name_(std::move(name)) {}
@@ -86,8 +115,11 @@ namespace Graph {
             output_.push_back(t);
             t->set_producer(this);
         }
-    };
 
+        void add_attribute(Attribute&& atr) {
+            attributes_.insert({atr.get_name(), std::move(atr)});
+        }
+    };
 
     class Graph {
     private:
