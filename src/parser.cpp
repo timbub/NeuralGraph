@@ -53,41 +53,40 @@ void parse_graph(Graph::Graph& graph, const onnx::GraphProto& onnx_graph) {
 
 void process_attributes(const ::onnx::NodeProto& proto_node, Graph::Node* node) {
     for(auto& proto_atr: proto_node.attribute()) {
-    //TODO: create atr after processing< сначала получит value
-        Graph::Attribute atr(proto_atr.name(), static_cast<Graph::Attribute::AttributeType>(proto_atr.type()));
-        switch(atr.get_type()) {
+        Graph::Attribute::Value value;
+        switch(proto_atr.type()) {
         case Graph::Attribute::AttributeType::INT: {
-            atr.value_ = proto_atr.i();
+            value = proto_atr.i();
             break;
         }
         case Graph::Attribute::AttributeType::INTS: {
-            std::vector<int> value(proto_atr.ints().begin(), proto_atr.ints().end());
-            atr.value_ = std::move(value);
+            std::vector<int64_t> value_i(proto_atr.ints().begin(), proto_atr.ints().end());
+            value = std::move(value_i);
             break;
         }
         case Graph::Attribute::AttributeType::FLOAT: {
-            atr.value_ = proto_atr.f();
+            value = proto_atr.f();
             break;
         }
         case Graph::Attribute::AttributeType::FLOATS: {
-            std::vector<float> value(proto_atr.floats().begin(), proto_atr.floats().end());
-            atr.value_ = std::move(value);
+            std::vector<float> value_f(proto_atr.floats().begin(), proto_atr.floats().end());
+            value = std::move(value_f);
             break;
         }
         case Graph::Attribute::AttributeType::STRING: {
-            atr.value_ = proto_atr.s();
+            value = proto_atr.s();
             break;
         }
         case Graph::Attribute::AttributeType::STRINGS: {
-            std::vector<std::string> value(proto_atr.strings().begin(), proto_atr.strings().end());
-            atr.value_ = std::move(value);
+            std::vector<std::string> value_s(proto_atr.strings().begin(), proto_atr.strings().end());
+            value = std::move(value_s);
             break;
         }
         default: {
             break;
         }
         }
-        node->add_attribute(std::move(atr));
+        node->add_attribute(Graph::Attribute(proto_atr.name(), static_cast<Graph::Attribute::AttributeType>(proto_atr.type()), value));
     }
 }
 

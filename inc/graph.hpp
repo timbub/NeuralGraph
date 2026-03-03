@@ -85,9 +85,10 @@ namespace Graph {
         AttributeType type_;
         Value value_;
     public:
-        Attribute(std::string name, AttributeType type) : name_(name), type_(type) {}
+        Attribute(std::string name, AttributeType type, Value value) : name_(name), type_(type), value_(value) {}
         std::string   get_name() { return name_; }
         AttributeType get_type() { return type_; }
+        Value get_value() { return value_; }
         //TODO: getter for value_
     };
 
