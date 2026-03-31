@@ -1,6 +1,8 @@
 build/
 cmake-build-debug/
 
+codegen/llvm-project
+
 *.pb.cc
 *.pb.h
 

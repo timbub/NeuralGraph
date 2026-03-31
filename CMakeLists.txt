@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.14)
-project(NeuralGraph)
+cmake_minimum_required(VERSION 3.15)
+project(NeuralGraphCompiler)
 
 add_compile_options(
     $<$<CONFIG:Debug>:-fsanitize=address>
@@ -14,16 +14,20 @@ add_link_options(
 )
 
 find_package(Protobuf REQUIRED)
+find_package(MLIR REQUIRED CONFIG)
+find_package(LLVM REQUIRED CONFIG)
 
-include_directories(${CMAKE_SOURCE_DIR}/inc)
-include_directories(${CMAKE_BINARY_DIR})
+include_directories(${LLVM_INCLUDE_DIRS} ${MLIR_INCLUDE_DIRS})
 
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${CMAKE_SOURCE_DIR}/onnx/onnx.proto)
+add_executable(ng_compiler main.cpp)
+add_subdirectory(front)
+add_subdirectory(codegen)
 
-add_executable(graph
-    src/main.cpp
-    src/parser.cpp
-    src/visualization.cpp
-    ${PROTO_SRCS}
+target_link_libraries(ng_compiler PRIVATE
+    frontend_lib
+    codegen_lib
 )
-target_link_libraries(graph ${Protobuf_LIBRARIES})
+
+#cmake -B build -S . -G Ninja \
+  #-DMLIR_DIR=/mnt/c/prplus/NeuralGraph/codegen/llvm-project/build/lib/cmake/mlir \
+  #-DLLVM_DIR=/mnt/c/prplus/NeuralGraph/codegen/llvm-project/build/lib/cmake/llvm

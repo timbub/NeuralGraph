@@ -1,0 +1,18 @@
+add_library(codegen_lib STATIC
+    codegen.cpp
+)
+
+target_include_directories(codegen_lib PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${LLVM_INCLUDE_DIRS}
+    ${MLIR_INCLUDE_DIRS}
+)
+
+target_link_libraries(codegen_lib PUBLIC
+    frontend_lib
+    MLIRIR
+    MLIRSupport
+    MLIRFuncDialect
+    MLIRArithDialect
+    MLIRLinalgDialect
+)

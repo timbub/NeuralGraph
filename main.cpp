@@ -5,6 +5,9 @@
 #include "parser.hpp"
 #include "visualization.hpp"
 
+#include "mlir/IR/MLIRContext.h"
+#include "mlir/IR/BuiltinOps.h"
+
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         std::cerr << "Write: <input.onnx> <output.dot>\n";
@@ -28,6 +31,8 @@ int main(int argc, char* argv[]) {
     parse_graph(graph, model.graph());
 
     GraphVisual::visualizate(graph, output_dot);
+
+    mlir::MLIRContext context;
 
     return 0;
 }
